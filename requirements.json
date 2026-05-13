@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R1",
+    "description": "The rover shall not run out of battery",
+    "benchmark_ltl": "(G (\"battery > 0\"))"
+  },
+  {
+    "id": "R1.1",
+    "description": "Charging station location shall be static",
+    "benchmark_ltl": "(G (\"chargePosition == x\"))"
+  },
+  {
+    "id": "R1.2",
+    "description": "Charging station shall be selected as the next destination whenever the recharge flag is set to true",
+    "benchmark_ltl": "(G (recharge -> (\"goal == chargePosition\")))"
+  },
+  {
+    "id": "R1.3",
+    "description": "Battery monitor shall show battery charge 5% lower than currently estimated",
+    "benchmark_ltl": "(G (\"battery == ((pre_battery - (1 / n)) - 0.05)\"))"
+  },
+  {
+    "id": "R1.4",
+    "description": "The interface recharge output shall be set to true when the current battery charge is lower than battery needed to reach the charging station from the current position plus 5% battery charge.",
+    "benchmark_ltl": "(G ((\"(0.95 * battery) <= chargeNeeded_var\") -> recharge))"
+  },
+  {
+    "id": "R1.5",
+    "description": "Once at charging station, rover shall remain there until battery reaches full charge.",
+    "benchmark_ltl": "(G (((\"goal == chargePosition\") & atGoal) -> batteryFull))"
+  },
+  {
+    "id": "R1.6",
+    "description": "Each step in the plan shall not use more than 1/n amount of battery",
+    "benchmark_ltl": "(G (\"battery == (pre_battery - ((1 / n) * length_plan))\"))"
+  },
+  {
+    "id": "R2",
+    "description": "The rover shall not collide with an obstacle",
+    "benchmark_ltl": "(G (! Obstacle_currentPosition))"
+  },
+  {
+    "id": "R2.1",
+    "description": "Initial rover position shall be static",
+    "benchmark_ltl": "(G (\"initialPosition == y\"))"
+  },
+  {
+    "id": "R2.2",
+    "description": "Current rover position shall be accurate",
+    "benchmark_ltl": "(G (\"currentPosition == currentPhysicalPosition\"))"
+  },
+  {
+    "id": "R2.2.1",
+    "description": "The vision subsystem shall ensure that the initial current rover position as recognised by the Vision is equal to the static initial position",
+    "benchmark_ltl": "(\"start == s0\")"
+  },
+  {
+    "id": "R2.2.2",
+    "description": "The Vision subsystem shall ensure that the current position is not a position with an obstacle",
+    "benchmark_ltl": "(G (! (\"currentPosition != obstacle\")))"
+  },
+  {
+    "id": "R2.3",
+    "description": "The path to the next destination shall be calculated from the current rover position",
+    "benchmark_ltl": "(G ((\"plan != 0\") -> planHasStart))"
+  },
+  {
+    "id": "R2.4",
+    "description": "All obstacles shall be correctly identified",
+    "benchmark_ltl": "(G (isObstacle -> obstaclePhysicallyDetected))"
+  },
+  {
+    "id": "R2.4.1",
+    "description": "An obstacle shall not be in the location of the initial rover position",
+    "benchmark_ltl": "(G (\"obstacle != s0\"))"
+  },
+  {
+    "id": "R2.4.2",
+    "description": "An obstacle shall not be in the location of the charging station",
+    "benchmark_ltl": "(G (\"obstacle != chargePosition\"))"
+  },
+  {
+    "id": "R2.4.3",
+    "description": "An obstacle shall not be in the same location as a heatpoint",
+    "benchmark_ltl": "(G (! (\"obstacle == heatpointLocation\")))"
+  },
+  {
+    "id": "R2.5",
+    "description": "The calculated path to destination shall not include a location with an obstacle",
+    "benchmark_ltl": "(G (! planContainsObstacle))"
+  },
+  {
+    "id": "R2.6",
+    "description": "Rover shall not go faster than 10kmph",
+    "benchmark_ltl": "(G (\"speed <= 10\"))"
+  },
+  {
+    "id": "R3",
+    "description": "The rover shall visit all reachable heatpoints",
+    "benchmark_ltl": "(G ((isHeatpoint & isReachable) -> (F visited)))"
+  },
+  {
+    "id": "R3.1",
+    "description": "All heatpoints shall be correctly identified",
+    "benchmark_ltl": "(G (isHeatpoint -> heatPhysicallyMeasured))"
+  },
+  {
+    "id": "R3.1.1",
+    "description": "A valid heatpoint position shall not be the same as the initial rover position",
+    "benchmark_ltl": "(G (\"heatpointLocation != s0\"))"
+  },
+  {
+    "id": "R3.1.2",
+    "description": "A valid heatpoint position shall not be the same as the charging station position",
+    "benchmark_ltl": "(G (\"heatpointLocation != chargePosition\"))"
+  },
+  {
+    "id": "R3.1.3",
+    "description": "A valid heatpoint shall not be on the same location as a valid obstacle",
+    "benchmark_ltl": "(G (\"heatpointLocation != obstacle\"))"
+  },
+  {
+    "id": "R3.2",
+    "description": "Visited heatpoint shall be removed from the list of destinations to visit",
+    "benchmark_ltl": "((G (((! atGoal) & (X atGoal)) -> (X (((G[0,1] (! removeGoalFromSet)) | (G (! removeGoalFromSet))) & (F[0,2] removeGoalFromSet))))) & (atGoal -> (((G[0,1] (! removeGoalFromSet)) | (G (! removeGoalFromSet))) & (F[0,2] removeGoalFromSet))))"
+  },
+  {
+    "id": "R3.3",
+    "description": "The hotest heatpoint that was not visited before shall be the current goal when recharge flag is false",
+    "benchmark_ltl": "(G ((! recharge) -> (\"goal == hottestUnvisited\")))"
+  },
+  {
+    "id": "R3.4",
+    "description": "The shortest path to the current goal shall be selected",
+    "benchmark_ltl": "(G isShortestPath)"
+  },
+  {
+    "id": "R3.5",
+    "description": "The interface subsystem shall set atGoal flag to true only when the current rover position is equal to the current goal position",
+    "benchmark_ltl": "(G (atGoal -> (\"currentPosition == goal\")))"
+  }
+]
